@@ -1,11 +1,18 @@
 
+:root
+{
+	--font-family: 'Courier New', Courier, monospace;
+	--background-color: #121212;
+	--text-color: #ffffff;
+}
+
 body
 {
 	/* colors */
-	background-color: #121212;
-	color: #ffffff;
+	background-color: var(--background-color);
+	color: var(--text-color);
 
 	/* fonts */
-	font-family: 'Courier New', Courier, monospace;
+	font-family: var(--font-family);
 	font-size: 24px;
 }

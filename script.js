@@ -1,6 +1,6 @@
 // HTML Element References
 const terminalOutput = document.getElementById('terminal-output');
-const userCommand = document.getElementById('user-command');
+const typeInput = document.getElementById('type-input');
 
 // History
 let commandHistory = [];
@@ -11,7 +11,8 @@ document.addEventListener("keydown", (event) =>
 {
 	if (event.key === "Enter")
 	{
-		const command = userCommand.value.trim();
+		const command = typeInput.innerHTML.trim().replace(/\s+/g, ' ');
+		typeInput.innerHTML = "";
 
 		if (command)
 		{
@@ -20,18 +21,31 @@ document.addEventListener("keydown", (event) =>
 			historyIndex = commandHistory.length;
 
 			// Output
-			terminalOutput.textContent += `\n${"admin@frederickschubert.de:~$ " + command}`;
+			terminalOutput.innerHTML += `<div>${"admin@frederickschubert.de:~$ " + command}</div>`;
 			terminalOutput.scrollTop = terminalOutput.scrollHeight;
-			userCommand.value = '';
 
 			// Command Handling
-			switch (command)
+			let commandparts = command.split(' ');
+			let keyword = commandparts[0];
+			let args = commandparts.slice(1);
+			switch (keyword)
 			{
 				case "help":
-					terminalOutput.textContent += "\nThis text is super helpful! You feel thoroughly helped and a soothing feeling spreads throughout your body. This is a placeholder.";
+					terminalOutput.innerHTML += "<div>This text is super helpful! You feel thoroughly helped and a soothing feeling spreads throughout your body. This is a placeholder.</div>";
+					break;
+				case "clear":
+					terminalOutput.innerHTML = "";
+					break;
+				case "font":
+					if (executeFont(args[0]) != 0)
+						terminalOutput.innerHTML += "<div>Usage: font [mono|serif|sans|funky]</div>";
+					break;
+				case "background":
+					if (executeBackground(args[0]) != 0)
+						terminalOutput.innerHTML += "<div>Usage: background [hex color code]</div>";
 					break;
 				default:
-					terminalOutput.textContent += `\nCommand not found: '${command}'. Type 'help' for a list of commands.`;
+					terminalOutput.innerHTML += `<div>Command not found: '${command}'. Type 'help' for a list of commands.</div>`;
 					break;
 			}
 		}
@@ -51,5 +65,15 @@ document.addEventListener("keydown", (event) =>
 			const valueLength = userCommand.value.length;
 			userCommand.setSelectionRange(valueLength, valueLength);
 		}, 0);
+	}
+	else if (/^[0-9a-zA-Z -#]$/.test(event.key))
+	{
+		typeInput.innerHTML += event.key;
+	}
+	else if (event.key == "Backspace")
+	{
+		event.preventDefault();
+		if (typeInput.innerHTML.length > 0)
+			typeInput.innerHTML = typeInput.innerHTML.slice(0, -1);
 	}
 });
