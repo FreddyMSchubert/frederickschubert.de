@@ -16,3 +16,13 @@ body
 	font-family: var(--font-family);
 	font-size: 24px;
 }
+
+a
+{
+	color: var(--text-color);
+}
+
+.highlight
+{
+	font-weight: bold;
+}

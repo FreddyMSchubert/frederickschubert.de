@@ -1,4 +1,4 @@
-function executeBackground(colorCode) {
+function executeColor(colorCode) {
 	if (/^#?([0-9A-F]{3}){1,2}$/i.test(colorCode))
 	{
 		const validColorCode = colorCode.startsWith('#') ? colorCode : '#' + colorCode;
@@ -28,6 +28,25 @@ function executeFont(font)
 			break;
 		case "funky":
 			document.documentElement.style.setProperty('--font-family', "'Comic Sans MS', cursive");
+			break;
+		default:
+			return -1;
+	}
+	return 0;
+}
+
+function executeCd(cd)
+{
+	switch (cd.toLowerCase())
+	{
+		case "cv":
+			window.open('https://frederickschubert.de/curriculumvitae.html', '_blank');
+			break;
+		case "github":
+			window.open('https://github.com/FreddyMSchubert', '_blank');
+			break;
+		case "linkedin":
+			window.open('https://www.linkedin.com/in/frederick-m-schubert/', '_blank');
 			break;
 		default:
 			return -1;

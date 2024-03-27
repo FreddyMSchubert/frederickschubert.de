@@ -1,5 +1,11 @@
 # frederickschubert.de Landing Page Changelog
 
+## v0.3.0
+- Added proper menu and about texts
+- Added cd functionality to navigate to cv, linkedin, github
+- added highlight styling & link coloring
+- renamed background command to color & util.js to color_util.js
+
 ## v0.2.0
 - Replaced html input with custom input field
 - worked on css, now all lines have the same styling

@@ -30,8 +30,16 @@ document.addEventListener("keydown", (event) =>
 			let args = commandparts.slice(1);
 			switch (keyword)
 			{
+				case "about":
+					terminalOutput.innerHTML += "<div><span class='highlight'>Hi there, I'm Freddy!</span><br><br>If you want to get in contact with me – you might have questions, feedback or a quest – you can reach me via this website.<br>In case you’re unsure, contact me anyway. I answer every Email and I am excited for yours!<br><span class='highlight'>Email:</span> <a href='mailto:mail@frederickschubert.de'>mail@frederickschubert.de</a><br><br>Type 'help' for menu.<br></div>"
+					break;
 				case "help":
-					terminalOutput.innerHTML += "<div>This text is super helpful! You feel thoroughly helped and a soothing feeling spreads throughout your body. This is a placeholder.</div>";
+				case "menu":
+					terminalOutput.innerHTML += "<div><span class='highlight'>General:</span> about | help<br><span class='highlight'>Nagivation:</span> cd [CV | LinkedIn | GitHub] <br><span class='highlight'>Misc:</span> clear | font | color</div>";
+					break;
+				case "cd":
+					if (executeCd(args[0]) != 0)
+						terminalOutput.innerHTML += "<div>Usage: cd [CV | LinkedIn | GitHub]</div>";
 					break;
 				case "clear":
 					terminalOutput.innerHTML = "";
@@ -40,9 +48,9 @@ document.addEventListener("keydown", (event) =>
 					if (executeFont(args[0]) != 0)
 						terminalOutput.innerHTML += "<div>Usage: font [mono|serif|sans|funky]</div>";
 					break;
-				case "background":
-					if (executeBackground(args[0]) != 0)
-						terminalOutput.innerHTML += "<div>Usage: background [hex color code]</div>";
+				case "color":
+					if (executeColor(args[0]) != 0)
+						terminalOutput.innerHTML += "<div>Usage: color [hex color code]</div>";
 					break;
 				default:
 					terminalOutput.innerHTML += `<div>Command not found: '${command}'. Type 'help' for a list of commands.</div>`;
