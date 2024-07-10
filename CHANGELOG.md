@@ -1,5 +1,10 @@
 # frederickschubert.de Landing Page Changelog
 
+### v0.3.1
+- Added "Click here for considerably less epic GUI - based homepage. :P" button
+- Moved scripts into subfolder
+- minor changes
+
 ## v0.3.0
 - Added proper menu and about texts
 - Added cd functionality to navigate to cv, linkedin, github

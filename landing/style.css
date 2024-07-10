@@ -26,3 +26,11 @@ a
 {
 	font-weight: bold;
 }
+
+
+#gui-button
+{
+	position: absolute;
+	bottom: 10px;
+	right: 10px;
+}

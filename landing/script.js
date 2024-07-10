@@ -21,7 +21,7 @@ document.addEventListener("keydown", (event) =>
 			historyIndex = commandHistory.length;
 
 			// Output
-			terminalOutput.innerHTML += `<div>${"admin@frederickschubert.de:~$ " + command}</div>`;
+			terminalOutput.innerHTML += `<div>${"user@frederickschubert.de:~$ " + command}</div>`;
 			terminalOutput.scrollTop = terminalOutput.scrollHeight;
 
 			// Command Handling
@@ -31,11 +31,12 @@ document.addEventListener("keydown", (event) =>
 			switch (keyword)
 			{
 				case "about":
-					terminalOutput.innerHTML += "<div><span class='highlight'>Hi there, I'm Freddy!</span><br><br>If you want to get in contact with me – you might have questions, feedback or a quest – you can reach me via this website.<br>In case you’re unsure, contact me anyway. I answer every Email and I am excited for yours!<br><span class='highlight'>Email:</span> <a href='mailto:mail@frederickschubert.de'>mail@frederickschubert.de</a><br><br>Type 'help' for menu.<br></div>"
+					terminalOutput.innerHTML += "<div><span class='highlight'>Hi there, I'm Freddy!</span><br><br>If you want to get in contact with me – you might have questions, feedback or a quest – you can reach me via this website.<br>In case you’re unsure, contact me anyway. I answer every Email and I am excited for yours!<br><span class='highlight'>Email:</span> <a href='mailto:mail@frederickschubert.de'>mail@frederickschubert.de</a><br><br>Type 'menu' for menu.<br></div>"
 					break;
 				case "help":
 				case "menu":
-					terminalOutput.innerHTML += "<div><span class='highlight'>General:</span> about | help<br><span class='highlight'>Nagivation:</span> cd [CV | LinkedIn | GitHub] <br><span class='highlight'>Misc:</span> clear | font | color</div>";
+				case "ls":
+					terminalOutput.innerHTML += "<div><span class='highlight'>General:</span> about | menu<br><span class='highlight'>Nagivation:</span> cd [CV | LinkedIn | GitHub] <br><span class='highlight'>Misc:</span> clear | font | color</div>";
 					break;
 				case "cd":
 					if (executeCd(args[0]) != 0)
