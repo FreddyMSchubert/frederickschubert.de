@@ -39,9 +39,6 @@ function executeCd(cd)
 {
 	switch (cd.toLowerCase())
 	{
-		case "cv":
-			window.open('https://frederickschubert.de/curriculumvitae.html', '_blank');
-			break;
 		case "github":
 			window.open('https://github.com/FreddyMSchubert', '_blank');
 			break;

@@ -40,7 +40,7 @@ document.addEventListener("keydown", (event) =>
 					break;
 				case "cd":
 					if (executeCd(args[0]) != 0)
-						terminalOutput.innerHTML += "<div>Usage: cd [CV | LinkedIn | GitHub]</div>";
+						terminalOutput.innerHTML += "<div>Usage: cd [LinkedIn | GitHub]</div>";
 					break;
 				case "clear":
 					terminalOutput.innerHTML = "";
