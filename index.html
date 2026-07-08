@@ -3,29 +3,27 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>frederickschubert.de</title>
-	<link rel="stylesheet" href="landing/style.css">
+	<title>Freddy CLI</title>
+	<link rel="stylesheet" href="style.css">
 </head>
 <body>
-	<div id="terminal-container">
-		<div id="terminal-output"></div>
-		<div id="user-input">
-			<span class="prompt">admin@frederickschubert.de:~$ </span>
-			<span id="type-input"></span>
+	<div id="window">
+		<div id="titlebar">
+			<div id="traffic-lights">
+				<span class="light close"></span>
+				<span class="light minimize"></span>
+				<span class="light maximize"></span>
+			</div>
+			<div>guest@frederickschubert.com</div>
+		</div>
+		<div id="terminal">
+			<div>
+				<span class="prompt">guest@frederickschubert.com:~$ </span>
+				<span id="input"></span>
+			</div>
 		</div>
 	</div>
 
-	<a href="https://frederickschubert.de/startseite/">
-		<div id ="gui-button">
-			<button>
-				Click here for considerably less epic GUI - based homepage. :P
-			</button>
-		</div>
-	</a>
-
-	<!-- Scripts -->
-	<script src="landing/commands.js"></script>
-	<script src="landing/color_util.js"></script>
-	<script src="landing/script.js"></script>
+	<script src="input.js"></script>
 </body>
 </html>

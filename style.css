@@ -1,0 +1,104 @@
+@font-face {
+	font-family: "JetBrains Mono Nerd Font";
+	font-style: normal;
+	font-weight: 400;
+	src: url("fonts/JetBrainsMonoNerdFont-Regular.ttf") format("truetype");
+}
+
+@font-face {
+	font-family: "Inter";
+	font-style: normal;
+	font-weight: 100 900;
+	src: url("fonts/InterVariable.ttf") format("truetype");
+}
+
+html,
+body {
+	margin: 0;
+	background: #817D72;
+}
+
+body {
+	min-height: 100vh;
+	display: grid;
+	place-items: center;
+	font-family: "Inter", -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
+}
+
+#window {
+	width: min(1440px, calc(100vw - 48px));
+	height: min(900px, calc(100vh - 48px));
+	display: flex;
+	flex-direction: column;
+	overflow: hidden;
+	border-radius: 14px;
+	background: #000;
+	box-shadow: 0 24px 80px rgb(0 0 0 / 25%);
+}
+
+#titlebar {
+	position: relative;
+	height: 32px;
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	padding: 0 14px 0 9px;
+	background: #fff;
+	color: #595959;
+	font-size: 13px;
+	font-weight: 700;
+}
+
+#titlebar::after {
+	position: absolute;
+	right: 0;
+	bottom: 0;
+	left: 0;
+	height: 1px;
+	background: linear-gradient(#c0c0c0 0 0.5px, #d9d9d9 0.5px 1px);
+	content: "";
+}
+
+#traffic-lights {
+	display: flex;
+	gap: 8px;
+}
+
+.light {
+	width: 14px;
+	height: 14px;
+	border-radius: 50%;
+}
+
+.close {
+	background: #ff5c5f;
+	box-shadow: inset 0 0 0 0.5px #fb1828;
+}
+
+.minimize {
+	background: #fac800;
+	box-shadow: inset 0 0 0 0.5px #f7b800;
+}
+
+.maximize {
+	background: #34c759;
+	box-shadow: inset 0 0 0 0.5px #00b41e;
+}
+
+#terminal {
+	flex: 1;
+	padding: 12px;
+	color: #39ff14;
+	font: 400 16px/1.5 "JetBrains Mono Nerd Font", "JetBrainsMono Nerd Font", "JetBrains Mono", "Cascadia Mono", Consolas, monospace;
+	text-shadow: 0 0 6px #39ff14;
+}
+
+.prompt {
+	color: #b6ffb0;
+}
+
+.cursor {
+	background: #6b6b6b;
+	color: #000;
+	text-shadow: none;
+}
