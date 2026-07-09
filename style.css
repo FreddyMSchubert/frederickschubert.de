@@ -38,6 +38,7 @@ body {
 
 #titlebar {
 	position: relative;
+	flex: 0 0 32px;
 	height: 32px;
 	display: flex;
 	align-items: center;
@@ -73,6 +74,7 @@ body {
 .close {
 	background: #ff5c5f;
 	box-shadow: inset 0 0 0 0.5px #fb1828;
+	cursor: pointer;
 }
 
 .minimize {
@@ -87,7 +89,9 @@ body {
 
 #terminal {
 	flex: 1;
+	min-height: 0;
 	padding: 12px;
+	overflow: auto;
 	color: #39ff14;
 	font: 400 16px/1.5 "JetBrains Mono Nerd Font", "JetBrainsMono Nerd Font", "JetBrains Mono", "Cascadia Mono", Consolas, monospace;
 	text-shadow: 0 0 6px #39ff14;
