@@ -1,7 +1,7 @@
 import { Command } from "../../command-system/command.js";
 
 export class Joke extends Command {
-	static command() { return "joke"; }
+	static names() { return ["joke"]; }
 	static description() { return "Fetch a joke from JokeAPI."; }
 
 	async run() {

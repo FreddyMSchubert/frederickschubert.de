@@ -22,7 +22,7 @@ export class CommandRunner {
 		const [name, ...args] = splitArguments(line);
 		if (!name) return true;
 
-		const CommandClass = this.commandClasses.find(command => command.command() === name);
+		const CommandClass = this.commandClasses.find(command => command.names().includes(name));
 		const output = new CommandOutput(this.context.terminal, this.context.inputLine);
 		if (!CommandClass) {
 			output.write(`zsh: command not found: ${name}`);
@@ -70,7 +70,9 @@ export class CommandRunner {
 	complete(line, cursor) {
 		const before = line.slice(0, cursor);
 		if (!before.includes(" ")) {
-			const matches = this.commandClasses.map(command => command.command()).filter(name => name.startsWith(before));
+			const matches = this.commandClasses
+				.flatMap(command => command.names())
+				.filter(name => name.startsWith(before));
 			if (matches.length === 1) return { text: matches[0] + line.slice(cursor), cursor: matches[0].length };
 		}
 		return this.context.filesystem.completePath(line, cursor);

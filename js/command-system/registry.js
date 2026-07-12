@@ -28,11 +28,14 @@ export const commands = [
 
 const names = new Set();
 for (const command of commands) {
-	const name = command.command();
+	const identifiers = command.names();
 	const description = command.description();
-	if (typeof name !== "string" || !name || typeof description !== "string" || !description) {
+	if (!Array.isArray(identifiers) || !identifiers.length || typeof description !== "string" || !description) {
 		throw new TypeError(`${command.name} has invalid metadata`);
 	}
-	if (names.has(name)) throw new TypeError(`Duplicate command: ${name}`);
-	names.add(name);
+	for (const identifier of identifiers) {
+		if (typeof identifier !== "string" || !identifier) throw new TypeError(`${command.name} has an invalid name`);
+		if (names.has(identifier)) throw new TypeError(`Duplicate command name: ${identifier}`);
+		names.add(identifier);
+	}
 }

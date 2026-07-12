@@ -1,6 +1,6 @@
 export class Command {
-	static command() {
-		throw new TypeError(`${this.name} must implement static command()`);
+	static names() {
+		throw new TypeError(`${this.name} must implement static names()`);
 	}
 
 	static description() {

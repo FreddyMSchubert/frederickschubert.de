@@ -1,5 +1,21 @@
 const user = "guest";
 const home = "/home/guest";
+const about = `<span class="about-page">
+	<span class="about-header">
+		<img class="about-avatar" src="https://github.com/FreddyMSchubert.png" alt="Portrait of Frederick M. Schubert">
+		<span class="about-identity">
+			<strong class="about-name">Frederick M. Schubert</strong>
+			<span class="about-subtitle">Software engineer</span>
+		</span>
+	</span>
+	<span class="about-links" aria-label="Links">
+		<a class="about-link" href="https://github.com/FreddyMSchubert" target="_blank" rel="noreferrer"><strong>GitHub</strong><span>github.com/FreddyMSchubert</span></a>
+		<a class="about-link" href="https://www.linkedin.com/in/frederick-m-schubert/" target="_blank" rel="noreferrer"><strong>LinkedIn</strong><span>linkedin.com/in/frederick-m-schubert</span></a>
+		<a class="about-link" href="mailto:hello2025@frederickschubert.de"><strong>Email</strong><span>hello2025@frederickschubert.de</span></a>
+		<a class="about-link" href="https://www.youtube.com/@FrederickSchubert" target="_blank" rel="noreferrer"><strong>YouTube</strong><span>@FrederickSchubert</span></a>
+	</span>
+	<span class="about-fact">Fun fact: this is a functional terminal — type 'man'.</span>
+</span>`;
 
 const dir = children => ({ type: "dir", children });
 const file = (content = "") => ({ type: "file", content });
@@ -19,7 +35,7 @@ function createFilesystem() {
 			bin: dir({}),
 			local: dir({ bin: dir({}) }),
 			share: dir({
-				"about.txt": file("Freddy CLI\nA small fake zsh-style filesystem running in your browser.\nUser: guest\nHome: /home/guest"),
+				"about.txt": file(about),
 			}),
 		}),
 		var: dir({ log: dir({}) }),

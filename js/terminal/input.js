@@ -26,7 +26,6 @@ let promptVisible = false;
 const konamiCode = ["ArrowUp", "ArrowUp", "ArrowDown", "ArrowDown", "ArrowLeft", "ArrowRight", "ArrowLeft", "ArrowRight", "b", "a"];
 let konamiIndex = 0;
 
-const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
 const promptText = () => `guest@frederickschubert.com:${filesystem.displayPath()}$ `;
 
 function renderInput() {
@@ -46,7 +45,7 @@ function renderInput() {
 
 async function submitCommand() {
 	const line = inputState.text;
-	const history = screen.write(promptText() + line);
+	screen.write(promptText() + line);
 	if (line && line !== inputState.history.at(-1)) inputState.history.push(line);
 	inputState.historyIndex = inputState.history.length;
 	inputState.historyDraft = "";
@@ -54,12 +53,8 @@ async function submitCommand() {
 	inputState.cursor = 0;
 
 	const done = runner.run(line);
-	history.hidden = runner.active !== null;
-	history.style.display = history.hidden ? "none" : "";
 	renderInput();
 	await done;
-	history.hidden = false;
-	history.style.display = "";
 	renderInput();
 	terminal.scrollTop = terminal.scrollHeight;
 }
@@ -89,7 +84,7 @@ function trackKonami(key) {
 	if (konamiIndex !== konamiCode.length) return { found: false, matched };
 
 	konamiIndex = 0;
-	screen.write(easterEggs.find("konami"));
+	screen.write(easterEggs.find("konami", "good job"));
 	return { found: true, matched };
 }
 
@@ -160,35 +155,15 @@ const progressBar = percent => {
 	return `[${"=".repeat(filled)}${"\u00a0".repeat(42 - filled)}]`;
 };
 
-async function fillProgress(from, to, duration) {
-	const started = performance.now();
-	while (true) {
-		const progress = Math.min(1, (performance.now() - started) / duration);
-		screen.replaceLast(progressBar(from + (to - from) * progress));
-		if (progress === 1) return;
-		await sleep(16);
-	}
-}
-
 async function runStartupSequence() {
 	screen.write("Booting Freddy OS!");
-	await sleep(500);
 	screen.write(progressBar(0));
-	await fillProgress(0, 39 / 42, 1000);
-	for (let filled = 40; filled <= 42; filled++) {
-		await sleep(420);
-		screen.replaceLast(progressBar(filled / 42));
-	}
+	await new Promise(requestAnimationFrame);
+	screen.replaceLast(progressBar(1));
 
 	promptVisible = true;
+	setInput("about");
 	renderInput();
-	await sleep(500);
-	for (const key of "about") {
-		await sleep(250);
-		insertInput(key);
-		renderInput();
-	}
-	await sleep(250);
 	await submitCommand();
 	startupLocked = false;
 }

@@ -100,7 +100,7 @@ const gallows = [
 ];
 
 export class Hangman extends Command {
-	static command() { return "hangman"; }
+	static names() { return ["hangman"]; }
 	static description() { return "Play a game of hangman."; }
 
 	async run(_args) {

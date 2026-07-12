@@ -1,8 +1,8 @@
 import { Command } from "../../command-system/command.js";
 
 export class Calc extends Command {
-	static command() { return "calc"; }
-	static description() { return "Evaluate math with Math.js."; }
+	static names() { return ["calc"]; }
+	static description() { return "Evaluate math."; }
 
 	async run(args) {
 		const expression = args.join(" ");
