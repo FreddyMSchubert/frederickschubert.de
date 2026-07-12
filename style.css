@@ -2,14 +2,14 @@
 	font-family: "JetBrains Mono Nerd Font";
 	font-style: normal;
 	font-weight: 400;
-	src: url("fonts/JetBrainsMonoNerdFont-Regular.ttf") format("truetype");
+	src: url("assets/fonts/JetBrainsMonoNerdFont-Regular.ttf") format("truetype");
 }
 
 @font-face {
 	font-family: "Inter";
 	font-style: normal;
 	font-weight: 100 900;
-	src: url("fonts/InterVariable.ttf") format("truetype");
+	src: url("assets/fonts/InterVariable.ttf") format("truetype");
 }
 
 html,
@@ -95,6 +95,15 @@ body {
 	color: #39ff14;
 	font: 400 16px/1.5 "JetBrains Mono Nerd Font", "JetBrainsMono Nerd Font", "JetBrains Mono", "Cascadia Mono", Consolas, monospace;
 	text-shadow: 0 0 6px #39ff14;
+}
+
+.terminal-block {
+	display: block;
+	white-space: pre-wrap;
+}
+
+.terminal-block[hidden] {
+	display: none;
 }
 
 .prompt {

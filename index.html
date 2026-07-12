@@ -4,6 +4,7 @@
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>Freddy CLI</title>
+	<link rel="icon" href="data:,">
 	<link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -16,18 +17,12 @@
 			</div>
 			<div>guest@frederickschubert.com</div>
 		</div>
-		<div id="terminal">
-			<div>
-				<span class="prompt">guest@frederickschubert.com:~$ </span>
-				<span id="input"></span>
-			</div>
+		<div id="terminal" tabindex="0" aria-label="Terminal">
+			<span id="input-line" class="terminal-block"><span class="prompt">guest@frederickschubert.com:~$ </span><span id="input"></span></span>
 		</div>
 	</div>
 
 	<script src="https://cdn.jsdelivr.net/npm/mathjs/lib/browser/math.min.js"></script>
-	<script src="commands/command-system.js"></script>
-	<script src="commands/filesystem.js"></script>
-	<script src="commands/terminal.js"></script>
-	<script src="input.js"></script>
+	<script type="module" src="js/terminal/input.js"></script>
 </body>
 </html>
