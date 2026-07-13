@@ -8,7 +8,10 @@
 	},
 	"packageManager": "npm@11.13.0",
 	"scripts": {
+		"game-data": "node scripts/download-game-data.mjs",
+		"predev": "npm run game-data",
 		"dev": "vite",
+		"prebuild": "npm run game-data",
 		"build": "vite build",
 		"preview": "vite preview",
 		"format": "prettier --write .",

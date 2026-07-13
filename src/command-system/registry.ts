@@ -1,4 +1,6 @@
+import { Games } from "../commands/games/games.js";
 import { Hangman } from "../commands/games/hangman.js";
+import { Wordle } from "../commands/games/wordle.js";
 import { About } from "../commands/system/about.js";
 import { Calc } from "../commands/system/calc.js";
 import { Clear } from "../commands/system/clear.js";
@@ -42,7 +44,9 @@ export const commands: readonly CommandConstructor[] = [
 	Cat,
 	Tree,
 	Reset,
+	Games,
 	Hangman,
+	Wordle,
 ];
 
 const names = new Set<string>();

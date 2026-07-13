@@ -14,7 +14,7 @@ const about = `<span class="about-page">
 		<a class="about-link" href="mailto:hello2025@frederickschubert.de"><strong>Email</strong><span>hello2025@frederickschubert.de</span></a>
 		<a class="about-link" href="https://www.youtube.com/@FrederickSchubert" target="_blank" rel="noreferrer"><strong>YouTube</strong><span>@FrederickSchubert</span></a>
 	</span>
-	<span class="about-fact">Fun fact: this is a functional terminal — type 'man'.</span>
+	<span class="about-fact">Fun fact: this is a functional terminal — type 'man' or 'games'.</span>
 </span>`;
 
 interface DirectoryNode {

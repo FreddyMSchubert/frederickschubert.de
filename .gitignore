@@ -1,8 +1,9 @@
+assets/game-input
+
 # Dependencies and generated output
 node_modules/
 dist/
 coverage/
-
 # Environment and logs
 .env
 .env.*

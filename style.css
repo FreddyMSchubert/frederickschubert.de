@@ -232,3 +232,68 @@ body {
 	color: #000;
 	text-shadow: none;
 }
+
+.wordle-heading,
+.wordle-grid,
+.wordle-row,
+.wordle-message,
+.wordle-instructions {
+	display: block;
+}
+
+.wordle-heading {
+	margin-bottom: 12px;
+}
+
+.wordle-grid {
+	display: grid;
+	gap: 5px;
+	width: max-content;
+	text-shadow: none;
+}
+
+.wordle-row {
+	display: grid;
+	grid-template-columns: repeat(5, 44px);
+	gap: 5px;
+}
+
+.wordle-tile {
+	display: grid;
+	width: 44px;
+	height: 44px;
+	place-items: center;
+	box-sizing: border-box;
+	border: 2px solid #3a3a3c;
+	background: #121213;
+	color: #fff;
+	font-size: 24px;
+	font-weight: 700;
+	line-height: 1;
+}
+
+.wordle-correct {
+	border-color: #538d4e;
+	background: #538d4e;
+}
+
+.wordle-present {
+	border-color: #b59f3b;
+	background: #b59f3b;
+}
+
+.wordle-absent {
+	border-color: #3a3a3c;
+	background: #3a3a3c;
+}
+
+.wordle-message {
+	min-height: 24px;
+	margin-top: 8px;
+	color: #fff;
+	text-shadow: none;
+}
+
+.wordle-instructions {
+	color: #b6ffb0;
+}
