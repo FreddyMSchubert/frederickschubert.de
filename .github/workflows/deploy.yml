@@ -57,14 +57,65 @@ jobs:
           fi
           echo "::notice::TCP port 22 is reachable"
 
-          lftp --norc -c "
+          sftp_command() {
+            lftp --norc -c "
               set cmd:fail-exit true;
               set net:max-retries 1;
               set net:timeout 15;
               set sftp:auto-confirm true;
+              open --user \"${FTP_USERNAME}\" --env-password -p 22 \"sftp://${FTP_HOST}\";
+              $1
+            "
+          }
+
+          probe="deploy-probe-${GITHUB_RUN_ID}"
+          cleanup_probe() {
+            sftp_command "
+              set cmd:fail-exit false;
+              rm ${probe}-source;
+              rm ${probe}-renamed;
+              rmdir ${probe}-dir;
+            " > /dev/null 2>&1 || true
+          }
+          trap cleanup_probe EXIT
+
+          if ! sftp_command "
+            set xfer:use-temp-file false;
+            put site/index.html -o ${probe}-source;
+          "; then
+            echo "::error::Direct file creation was rejected by the SFTP server"
+            exit 1
+          fi
+          echo "::notice::Direct file creation succeeded"
+
+          if ! sftp_command "mv ${probe}-source ${probe}-renamed;"; then
+            echo "::error::Renaming a file to a new name was rejected by the SFTP server"
+            exit 1
+          fi
+          echo "::notice::Rename to a new name succeeded"
+
+          sftp_command "
+            set xfer:use-temp-file false;
+            put site/index.html -o ${probe}-source;
+          "
+          if ! sftp_command "mv ${probe}-source ${probe}-renamed;"; then
+            echo "::error::Renaming over an existing file was rejected by the SFTP server"
+            exit 1
+          fi
+          echo "::notice::Rename over an existing file succeeded"
+
+          if ! sftp_command "mkdir ${probe}-dir;"; then
+            echo "::error::Directory creation was rejected by the SFTP server"
+            exit 1
+          fi
+          echo "::notice::Directory creation succeeded"
+
+          cleanup_probe
+          trap - EXIT
+
+          sftp_command "
               set xfer:use-temp-file true;
               set xfer:temp-file-name *.tmp;
-              open --user \"${FTP_USERNAME}\" --env-password -p 22 \"sftp://${FTP_HOST}\";
               cls -1 > /dev/null;
               lcd site;
               mirror --reverse --no-perms --exclude-glob index.html ./ ./;
