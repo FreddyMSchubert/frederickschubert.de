@@ -45,81 +45,27 @@ jobs:
           : "${FTP_USERNAME:?FTP_USERNAME repository secret is missing or empty}"
           : "${LFTP_PASSWORD:?FTP_PASSWORD repository secret is missing or empty}"
 
-          if ! getent ahosts "${FTP_HOST}" > /dev/null; then
-            echo "::error::FTP_HOST does not resolve in DNS"
-            exit 1
-          fi
-          echo "::notice::DNS lookup succeeded"
-
-          if ! timeout 10 bash -c 'exec 3<>/dev/tcp/$1/22' -- "${FTP_HOST}"; then
-            echo "::error::SFTP host is not reachable on TCP port 22"
-            exit 1
-          fi
-          echo "::notice::TCP port 22 is reachable"
-
-          sftp_command() {
-            lftp --norc -c "
+          if ! lftp --norc -c "
               set cmd:fail-exit true;
               set net:max-retries 1;
               set net:timeout 15;
               set sftp:auto-confirm true;
+              set sftp:connect-program \"ssh -a -x -o ConnectTimeout=15 -o ConnectionAttempts=1\";
               open --user \"${FTP_USERNAME}\" --env-password -p 22 \"sftp://${FTP_HOST}\";
-              $1
-            "
-          }
+              cls -1 > /dev/null;
+              echo ::notice::SFTP login and listing succeeded;
 
-          probe="deploy-probe-${GITHUB_RUN_ID}"
-          cleanup_probe() {
-            sftp_command "
-              set cmd:fail-exit false;
-              rm ${probe}-source;
-              rm ${probe}-renamed;
-              rmdir ${probe}-dir;
-            " > /dev/null 2>&1 || true
-          }
-          trap cleanup_probe EXIT
-
-          if ! sftp_command "
-            set xfer:use-temp-file false;
-            put site/index.html -o ${probe}-source;
-          "; then
-            echo "::error::Direct file creation was rejected by the SFTP server"
-            exit 1
-          fi
-          echo "::notice::Direct file creation succeeded"
-
-          if ! sftp_command "mv ${probe}-source ${probe}-renamed;"; then
-            echo "::error::Renaming a file to a new name was rejected by the SFTP server"
-            exit 1
-          fi
-          echo "::notice::Rename to a new name succeeded"
-
-          sftp_command "
-            set xfer:use-temp-file false;
-            put site/index.html -o ${probe}-source;
-          "
-          if ! sftp_command "mv ${probe}-source ${probe}-renamed;"; then
-            echo "::error::Renaming over an existing file was rejected by the SFTP server"
-            exit 1
-          fi
-          echo "::notice::Rename over an existing file succeeded"
-
-          if ! sftp_command "mkdir ${probe}-dir;"; then
-            echo "::error::Directory creation was rejected by the SFTP server"
-            exit 1
-          fi
-          echo "::notice::Directory creation succeeded"
-
-          cleanup_probe
-          trap - EXIT
-
-          sftp_command "
               set xfer:use-temp-file true;
               set xfer:temp-file-name *.tmp;
-              cls -1 > /dev/null;
+              set xfer:make-backup true;
+              set xfer:backup-suffix .deploy-backup-%Y%m%d%H%M%S;
+              set xfer:keep-backup false;
               lcd site;
               mirror --reverse --no-perms --exclude-glob index.html ./ ./;
               put index.html -o index.html;
               mirror --reverse --delete --only-missing --no-perms ./ ./;
               bye;
-            "
+            "; then
+            echo "::error::SFTP failed; the last successful notice identifies the rejected operation"
+            exit 1
+          fi
