@@ -38,19 +38,16 @@ jobs:
       - name: Deploy
         env:
           FTP_HOST: ${{ secrets.FTP_HOST }}
-          FTP_PORT: ${{ secrets.FTP_PORT }}
           FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
           LFTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
         run: |
-          FTP_PORT="${FTP_PORT:-21}"
           lftp --norc \
             --user "${FTP_USERNAME}" \
             --env-password \
-            -p "${FTP_PORT}" \
+            -p 22 \
             -e "
               set cmd:fail-exit true;
-              set ftp:ssl-force true;
-              set ssl:verify-certificate true;
+              set sftp:auto-confirm true;
               set xfer:use-temp-file true;
               set xfer:temp-file-name .incomplete-*;
               lcd site;
@@ -59,4 +56,4 @@ jobs:
               mirror --reverse --delete --only-missing --parallel=4 --no-perms ./ ./;
               bye;
             " \
-            "ftp://${FTP_HOST}"
+            "sftp://${FTP_HOST}"
