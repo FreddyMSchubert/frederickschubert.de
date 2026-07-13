@@ -1,0 +1,335 @@
+const user = "guest";
+const home = "/home/guest";
+const about = `<span class="about-page">
+	<span class="about-header">
+		<img class="about-avatar" src="https://github.com/FreddyMSchubert.png" alt="Portrait of Frederick M. Schubert">
+		<span class="about-identity">
+			<strong class="about-name">Frederick M. Schubert</strong>
+			<span class="about-subtitle">Software engineer</span>
+		</span>
+	</span>
+	<span class="about-links" aria-label="Links">
+		<a class="about-link" href="https://github.com/FreddyMSchubert" target="_blank" rel="noreferrer"><strong>GitHub</strong><span>github.com/FreddyMSchubert</span></a>
+		<a class="about-link" href="https://www.linkedin.com/in/frederick-m-schubert/" target="_blank" rel="noreferrer"><strong>LinkedIn</strong><span>linkedin.com/in/frederick-m-schubert</span></a>
+		<a class="about-link" href="mailto:hello2025@frederickschubert.de"><strong>Email</strong><span>hello2025@frederickschubert.de</span></a>
+		<a class="about-link" href="https://www.youtube.com/@FrederickSchubert" target="_blank" rel="noreferrer"><strong>YouTube</strong><span>@FrederickSchubert</span></a>
+	</span>
+	<span class="about-fact">Fun fact: this is a functional terminal — type 'man'.</span>
+</span>`;
+
+interface DirectoryNode {
+	readonly type: "dir";
+	readonly children: Record<string, FileSystemNode>;
+}
+
+interface FileNode {
+	readonly type: "file";
+	readonly content: string;
+}
+
+type FileSystemNode = DirectoryNode | FileNode;
+
+const dir = (children: Record<string, FileSystemNode>): DirectoryNode => ({ type: "dir", children });
+const file = (content = ""): FileNode => ({ type: "file", content });
+
+function createFilesystem(): DirectoryNode {
+	return dir({
+		bin: dir({}),
+		dev: dir({}),
+		etc: dir({ hosts: file("127.0.0.1 localhost\n::1 localhost"), zshrc: file("# fake zsh config") }),
+		home: dir({ guest: dir({ Desktop: dir({}), Documents: dir({}), Downloads: dir({}) }) }),
+		lib: dir({}),
+		opt: dir({}),
+		private: dir({ tmp: dir({}) }),
+		sbin: dir({}),
+		tmp: dir({}),
+		usr: dir({
+			bin: dir({}),
+			local: dir({ bin: dir({}) }),
+			share: dir({
+				"about.txt": file(about),
+			}),
+		}),
+		var: dir({ log: dir({}) }),
+	});
+}
+
+export class FileSystem {
+	private root: DirectoryNode = createFilesystem();
+	private cwd = home;
+	private oldcwd = home;
+
+	constructor() {
+		this.reset();
+	}
+
+	cleanPath(path: string): string {
+		const parts: string[] = [];
+		for (const part of path.split("/")) {
+			if (!part || part === ".") continue;
+			if (part === "..") parts.pop();
+			else parts.push(part);
+		}
+		return `/${parts.join("/")}`;
+	}
+
+	pathOf(path = "."): string {
+		if (path === "~") return home;
+		if (path.startsWith("~/")) return this.cleanPath(`${home}/${path.slice(2)}`);
+		if (path === "-") return this.oldcwd;
+		return this.cleanPath(path.startsWith("/") ? path : `${this.cwd}/${path}`);
+	}
+
+	nodeAt(path: string): FileSystemNode | null {
+		let node: FileSystemNode = this.root;
+		for (const part of this.cleanPath(path).split("/").filter(Boolean)) {
+			if (node.type !== "dir") return null;
+			const child: FileSystemNode | undefined = node.children[part];
+			if (!child) return null;
+			node = child;
+		}
+		return node;
+	}
+
+	parentOf(path: string): readonly [DirectoryNode | null, string | undefined] {
+		const parts = this.pathOf(path).split("/").filter(Boolean);
+		const name = parts.pop();
+		const parent = this.nodeAt(`/${parts.join("/")}`);
+		return [parent?.type === "dir" ? parent : null, name];
+	}
+
+	displayPath(): string {
+		return this.cwd === home
+			? "~"
+			: this.cwd.startsWith(`${home}/`)
+				? `~/${this.cwd.slice(home.length + 1)}`
+				: this.cwd;
+	}
+
+	cd(args: readonly string[]): string {
+		if (args.length > 1) return "cd: too many arguments";
+		const target = args[0] ?? home;
+		const next = this.pathOf(target);
+		const node = this.nodeAt(next);
+		if (!node) return `cd: no such file or directory: ${target}`;
+		if (node.type !== "dir") return `cd: not a directory: ${target}`;
+		[this.cwd, this.oldcwd] = [next, this.cwd];
+		return target === "-" ? this.cwd : "";
+	}
+
+	pwd(): string {
+		return this.cwd;
+	}
+
+	ls(args: readonly string[]): string {
+		const flags = args.filter((argument) => argument.startsWith("-")).join("");
+		const targets = args.filter((argument) => !argument.startsWith("-"));
+		const paths = targets.length ? targets : ["."];
+		const showAll = flags.includes("a");
+		const long = flags.includes("l");
+		const blocks: string[] = [];
+
+		for (const target of paths) {
+			const node = this.nodeAt(this.pathOf(target));
+			if (!node) {
+				blocks.push(`ls: ${target}: No such file or directory`);
+				continue;
+			}
+			if (node.type === "file") {
+				blocks.push(long ? `-rw-r--r--  1 ${user} staff 0 Jul  8 00:00 ${target}` : target);
+				continue;
+			}
+
+			const names = Object.keys(node.children).sort();
+			const list = (showAll ? [".", "..", ...names] : names).map((name) => {
+				const isDirectory = name === "." || name === ".." || node.children[name]?.type === "dir";
+				const display = isDirectory ? `${name}/` : name;
+				return long
+					? `${isDirectory ? "d" : "-"}rw-r--r--  1 ${user} staff 0 Jul  8 00:00 ${display}`
+					: display;
+			});
+			blocks.push(
+				paths.length > 1 ? `${target}:\n${list.join(long ? "\n" : "  ")}` : list.join(long ? "\n" : "  "),
+			);
+		}
+		return blocks.join("\n\n");
+	}
+
+	mkdir(args: readonly string[]): string {
+		const parents = args[0] === "-p";
+		const paths = parents ? args.slice(1) : args;
+		if (!paths.length) return "mkdir: missing operand";
+
+		for (const path of paths) {
+			let node = this.root;
+			const parts = this.pathOf(path).split("/").filter(Boolean);
+			if (!parts.length) {
+				if (!parents) return `mkdir: ${path}: File exists`;
+				continue;
+			}
+			for (const [index, part] of parts.entries()) {
+				const last = index === parts.length - 1;
+				const child = node.children[part];
+				if (!child) {
+					if (!last && !parents) return `mkdir: ${path}: No such file or directory`;
+					const newDirectory = dir({});
+					node.children[part] = newDirectory;
+					node = newDirectory;
+				} else if (child.type !== "dir") return `mkdir: ${path}: Not a directory`;
+				else if (last && !parents) return `mkdir: ${path}: File exists`;
+				else node = child;
+			}
+		}
+		return "";
+	}
+
+	removePath(path: string, recursive: boolean, force: boolean, directoryOnly: boolean): string {
+		const [parent, name] = this.parentOf(path);
+		const command = directoryOnly ? "rmdir" : "rm";
+		if (!name) return directoryOnly ? `rmdir: ${path}: Directory not empty` : `rm: ${path}: is a directory`;
+		const node = parent?.children[name];
+		if (!node) return force ? "" : `${command}: ${path}: No such file or directory`;
+		if (node.type === "dir" && !recursive && !directoryOnly) return `rm: ${path}: is a directory`;
+		if (node.type !== "dir" && directoryOnly) return `rmdir: ${path}: Not a directory`;
+		if (node.type === "dir" && Object.keys(node.children).length && !recursive)
+			return `${command}: ${path}: Directory not empty`;
+		Reflect.deleteProperty(parent.children, name);
+		return "";
+	}
+
+	rm(args: readonly string[]): string {
+		const flags = args.filter((argument) => argument.startsWith("-")).join("");
+		const paths = args.filter((argument) => !argument.startsWith("-"));
+		const force = flags.includes("f");
+		if (!paths.length && !force) return "rm: missing operand";
+		return paths
+			.map((path) => this.removePath(path, flags.includes("r") || flags.includes("R"), force, false))
+			.filter(Boolean)
+			.join("\n");
+	}
+
+	rmdir(args: readonly string[]): string {
+		if (!args.length) return "rmdir: missing operand";
+		return args
+			.map((path) => this.removePath(path, false, false, true))
+			.filter(Boolean)
+			.join("\n");
+	}
+
+	touch(args: readonly string[]): string {
+		if (!args.length) return "touch: missing file operand";
+		for (const path of args) {
+			const [parent, name] = this.parentOf(path);
+			if (!parent) return `touch: ${path}: No such file or directory`;
+			if (!name || parent.children[name]?.type === "dir") continue;
+			parent.children[name] ??= file();
+		}
+		return "";
+	}
+
+	cat(args: readonly string[]): string {
+		if (!args.length) return "cat: missing file operand";
+		return args
+			.map((path) => {
+				const node = this.nodeAt(this.pathOf(path));
+				if (!node) return `cat: ${path}: No such file or directory`;
+				if (node.type === "dir") return `cat: ${path}: Is a directory`;
+				return node.content;
+			})
+			.join("\n");
+	}
+
+	tree(args: readonly string[]): string {
+		const target = args[0] ?? ".";
+		const root = this.nodeAt(this.pathOf(target));
+		if (!root) return `tree: ${target}: No such file or directory`;
+		const lines = [target];
+		const walk = (node: FileSystemNode, prefix = ""): void => {
+			if (node.type !== "dir") return;
+			const entries = Object.entries(node.children).sort(([a], [b]) => a.localeCompare(b));
+			entries.forEach(([name, child], index) => {
+				const last = index === entries.length - 1;
+				lines.push(`${prefix}${last ? "└── " : "├── "}${child.type === "dir" ? `${name}/` : name}`);
+				walk(child, `${prefix}${last ? "    " : "│   "}`);
+			});
+		};
+		walk(root);
+		return lines.join("\n");
+	}
+
+	copyOrMove(args: readonly string[], move: boolean): string {
+		const flags = args.filter((argument) => argument.startsWith("-")).join("");
+		const paths = args.filter((argument) => !argument.startsWith("-"));
+		const command = move ? "mv" : "cp";
+		if (paths.length < 2) return `${command}: missing file operand`;
+
+		const destination = paths.at(-1);
+		if (!destination) return `${command}: missing file operand`;
+		const sources = paths.slice(0, -1);
+		const destinationPath = this.pathOf(destination);
+		const destinationNode = this.nodeAt(destinationPath);
+		if (sources.length > 1 && destinationNode?.type !== "dir")
+			return `${command}: target '${destination}' is not a directory`;
+
+		const errors: string[] = [];
+		for (const source of sources) {
+			const sourcePath = this.pathOf(source);
+			const sourceNode = this.nodeAt(sourcePath);
+			if (!sourceNode) {
+				errors.push(`${command}: ${source}: No such file or directory`);
+				continue;
+			}
+			const sourceName = sourcePath.split("/").at(-1);
+			if (!sourceName) continue;
+			const finalPath =
+				destinationNode?.type === "dir" ? this.cleanPath(`${destinationPath}/${sourceName}`) : destinationPath;
+			if (move && finalPath === sourcePath) continue;
+			if (move && sourceNode.type === "dir" && finalPath.startsWith(`${sourcePath}/`)) {
+				errors.push(`mv: cannot move '${source}' to a subdirectory of itself`);
+				continue;
+			}
+			if (!move && sourceNode.type === "dir" && !flags.includes("r") && !flags.includes("R")) {
+				errors.push(`cp: ${source} is a directory (not copied).`);
+				continue;
+			}
+
+			const [parent, name] = this.parentOf(finalPath);
+			if (!parent || !name) {
+				errors.push(`${command}: ${destination}: No such file or directory`);
+				continue;
+			}
+			parent.children[name] = move ? sourceNode : structuredClone(sourceNode);
+			if (move) this.removePath(source, true, false, false);
+		}
+		return errors.join("\n");
+	}
+
+	completePath(line: string, cursor: number): { readonly cursor: number; readonly text: string } | null {
+		const before = line.slice(0, cursor);
+		const match = /(^|\s)(\S*)$/.exec(before);
+		if (!match) return null;
+		const token = match[2] ?? "";
+		const slash = token.lastIndexOf("/");
+		const parentToken = slash >= 0 ? token.slice(0, slash + 1) : "";
+		const partial = slash >= 0 ? token.slice(slash + 1) : token;
+		const parent = this.nodeAt(parentToken ? this.pathOf(parentToken) : this.cwd);
+		if (parent?.type !== "dir") return null;
+		const matches = Object.entries(parent.children).filter(([name]) =>
+			name.toLowerCase().startsWith(partial.toLowerCase()),
+		);
+		if (matches.length !== 1) return null;
+		const matchEntry = matches[0];
+		if (!matchEntry) return null;
+		const [name, node] = matchEntry;
+		const completed = parentToken + (node.type === "dir" ? `${name}/` : name);
+		const start = before.length - token.length;
+		return { text: before.slice(0, start) + completed + line.slice(cursor), cursor: start + completed.length };
+	}
+
+	reset(): string {
+		this.root = createFilesystem();
+		this.cwd = home;
+		this.oldcwd = home;
+		return "filesystem reset";
+	}
+}

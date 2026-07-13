@@ -1,0 +1,21 @@
+# Dependencies and generated output
+node_modules/
+dist/
+coverage/
+
+# Environment and logs
+.env
+.env.*
+!.env.example
+*.log
+npm-debug.log*
+
+# Editors and operating systems
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Local Codex/agent state
+.agents/
+.codex/

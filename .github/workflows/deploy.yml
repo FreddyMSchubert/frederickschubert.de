@@ -1,71 +1,73 @@
 name: Deploy release
 
 on:
-  release:
-    types: [published]
+    release:
+        types: [published]
 
 concurrency:
-  group: production-deployment
-  cancel-in-progress: false
+    group: production-deployment
+    cancel-in-progress: false
 
 permissions:
-  contents: read
+    contents: read
 
 jobs:
-  deploy:
-    runs-on: ubuntu-latest
+    deploy:
+        runs-on: ubuntu-latest
 
-    steps:
-      - name: Check out release
-        uses: actions/checkout@v7
-        with:
-          ref: ${{ github.event.release.tag_name }}
-          path: release
-          persist-credentials: false
+        steps:
+            - name: Check out release
+              uses: actions/checkout@v6
+              with:
+                  ref: ${{ github.event.release.tag_name }}
+                  persist-credentials: false
 
-      - name: Prepare site
-        run: |
-          mkdir site
-          rsync -a \
-            --exclude='.git/' \
-            --exclude='.agents/' \
-            --exclude='.github/' \
-            release/ site/
+            - name: Set up Node.js
+              uses: actions/setup-node@v6
+              with:
+                  node-version: 24
+                  cache: npm
 
-      - name: Install FTP client
-        run: sudo apt-get update && sudo apt-get install --yes lftp
+            - name: Install dependencies
+              run: npm ci
 
-      - name: Deploy
-        env:
-          FTP_HOST: ${{ secrets.FTP_HOST }}
-          FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
-          LFTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
-        run: |
-          : "${FTP_HOST:?FTP_HOST repository secret is missing or empty}"
-          : "${FTP_USERNAME:?FTP_USERNAME repository secret is missing or empty}"
-          : "${LFTP_PASSWORD:?FTP_PASSWORD repository secret is missing or empty}"
+            - name: Verify and build release
+              run: npm run verify
 
-          if ! lftp --norc -c "
-              set cmd:fail-exit true;
-              set net:max-retries 1;
-              set net:timeout 15;
-              set sftp:auto-confirm true;
-              set sftp:connect-program \"ssh -a -x -o ConnectTimeout=15 -o ConnectionAttempts=1\";
-              open --user \"${FTP_USERNAME}\" --env-password -p 22 \"sftp://${FTP_HOST}\";
-              cls -1 > /dev/null;
-              echo ::notice::SFTP login and listing succeeded;
+            - name: Install FTP client
+              run: sudo apt-get update && sudo apt-get install --yes lftp
 
-              set xfer:use-temp-file true;
-              set xfer:temp-file-name *.tmp;
-              set xfer:make-backup true;
-              set xfer:backup-suffix .deploy-backup-%Y%m%d%H%M%S;
-              set xfer:keep-backup false;
-              lcd site;
-              mirror --reverse --no-perms --exclude-glob index.html ./ ./;
-              put index.html -o index.html;
-              mirror --reverse --delete --only-missing --no-perms ./ ./;
-              bye;
-            "; then
-            echo "::error::SFTP failed; the last successful notice identifies the rejected operation"
-            exit 1
-          fi
+            - name: Deploy
+              env:
+                  FTP_HOST: ${{ secrets.FTP_HOST }}
+                  FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+                  LFTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+              run: |
+                  : "${FTP_HOST:?FTP_HOST repository secret is missing or empty}"
+                  : "${FTP_USERNAME:?FTP_USERNAME repository secret is missing or empty}"
+                  : "${LFTP_PASSWORD:?FTP_PASSWORD repository secret is missing or empty}"
+
+                  if ! lftp --norc -c "
+                      set cmd:fail-exit true;
+                      set net:max-retries 1;
+                      set net:timeout 15;
+                      set sftp:auto-confirm true;
+                      set sftp:connect-program \"ssh -a -x -o ConnectTimeout=15 -o ConnectionAttempts=1\";
+                      open --user \"${FTP_USERNAME}\" --env-password -p 22 \"sftp://${FTP_HOST}\";
+                      cls -1 > /dev/null;
+                      echo ::notice::SFTP login and listing succeeded;
+
+                      set xfer:use-temp-file true;
+                      set xfer:temp-file-name *.tmp;
+                      set xfer:make-backup true;
+                      set xfer:backup-suffix .deploy-backup-%Y%m%d%H%M%S;
+                      set xfer:keep-backup false;
+                      lcd dist;
+                      mirror --reverse --no-perms --exclude-glob index.html ./ ./;
+                      put index.html -o index.html;
+                      mirror --reverse --delete --only-missing --no-perms ./ ./;
+                      bye;
+                    "; then
+                    echo "::error::SFTP failed; the last successful notice identifies the rejected operation"
+                    exit 1
+                  fi

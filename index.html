@@ -1,53 +1,69 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Freddy CLI</title>
-	<link rel="icon" href="data:,">
-	<link rel="stylesheet" href="style.css">
-</head>
-<body>
-	<div id="window">
-		<div id="titlebar">
-			<div id="traffic-lights">
-				<span class="light close"></span>
-				<span class="light minimize"></span>
-				<span class="light maximize"></span>
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Freddy CLI</title>
+		<link rel="icon" href="data:," />
+		<link rel="stylesheet" href="style.css" />
+	</head>
+	<body>
+		<div id="window">
+			<div id="titlebar">
+				<div id="traffic-lights">
+					<span class="light close"></span>
+					<span class="light minimize"></span>
+					<span class="light maximize"></span>
+				</div>
+				<div>guest@frederickschubert.com</div>
 			</div>
-			<div>guest@frederickschubert.com</div>
+			<div id="terminal" tabindex="0" aria-label="Terminal">
+				<span id="input-line" class="terminal-block"
+					><span class="prompt">guest@frederickschubert.com:~$ </span><span id="input"></span
+				></span>
+			</div>
 		</div>
-		<div id="terminal" tabindex="0" aria-label="Terminal">
-			<span id="input-line" class="terminal-block"><span class="prompt">guest@frederickschubert.com:~$ </span><span id="input"></span></span>
-		</div>
-	</div>
 
-	<span id="about-page" class="about-page" hidden>
-		<span class="about-header">
-			<img class="about-avatar" src="https://github.com/FreddyMSchubert.png" alt="Portrait of Frederick M. Schubert">
-			<span class="about-identity">
-				<strong class="about-name">Frederick M. Schubert</strong>
-				<span class="about-subtitle">Software engineer</span>
+		<span id="about-page" class="about-page" hidden>
+			<span class="about-header">
+				<img
+					class="about-avatar"
+					src="https://github.com/FreddyMSchubert.png"
+					alt="Portrait of Frederick M. Schubert"
+				/>
+				<span class="about-identity">
+					<strong class="about-name">Frederick M. Schubert</strong>
+					<span class="about-subtitle">Software engineer</span>
+				</span>
 			</span>
+			<span class="about-links" aria-label="Links">
+				<a class="about-link" href="https://github.com/FreddyMSchubert" target="_blank" rel="noreferrer">
+					<strong>GitHub</strong><span>github.com/FreddyMSchubert</span>
+				</a>
+				<a
+					class="about-link"
+					href="https://www.linkedin.com/in/frederick-m-schubert/"
+					target="_blank"
+					rel="noreferrer"
+				>
+					<strong>LinkedIn</strong><span>linkedin.com/in/frederick-m-schubert</span>
+				</a>
+				<a class="about-link" href="mailto:hello2025@frederickschubert.de">
+					<strong>Email</strong><span>hello2025@frederickschubert.de</span>
+				</a>
+				<a
+					class="about-link"
+					href="https://www.youtube.com/@FrederickSchubert"
+					target="_blank"
+					rel="noreferrer"
+				>
+					<strong>YouTube</strong><span>@FrederickSchubert</span>
+				</a>
+			</span>
+			<span class="about-fact">Fun fact: this is a functional terminal — type 'man'.</span>
 		</span>
-		<span class="about-links" aria-label="Links">
-			<a class="about-link" href="https://github.com/FreddyMSchubert" target="_blank" rel="noreferrer">
-				<strong>GitHub</strong><span>github.com/FreddyMSchubert</span>
-			</a>
-			<a class="about-link" href="https://www.linkedin.com/in/frederick-m-schubert/" target="_blank" rel="noreferrer">
-				<strong>LinkedIn</strong><span>linkedin.com/in/frederick-m-schubert</span>
-			</a>
-			<a class="about-link" href="mailto:hello2025@frederickschubert.de">
-				<strong>Email</strong><span>hello2025@frederickschubert.de</span>
-			</a>
-			<a class="about-link" href="https://www.youtube.com/@FrederickSchubert" target="_blank" rel="noreferrer">
-				<strong>YouTube</strong><span>@FrederickSchubert</span>
-			</a>
-		</span>
-		<span class="about-fact">Fun fact: this is a functional terminal — type 'man'.</span>
-	</span>
 
-	<script src="https://cdn.jsdelivr.net/npm/mathjs/lib/browser/math.min.js"></script>
-	<script type="module" src="js/terminal/input.js"></script>
-</body>
+		<script src="https://cdn.jsdelivr.net/npm/mathjs/lib/browser/math.min.js"></script>
+		<script type="module" src="/src/terminal/input.ts"></script>
+	</body>
 </html>
