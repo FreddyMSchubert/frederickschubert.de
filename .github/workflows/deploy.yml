@@ -41,19 +41,34 @@ jobs:
           FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
           LFTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
         run: |
-          lftp --norc \
-            --user "${FTP_USERNAME}" \
-            --env-password \
-            -p 22 \
-            -e "
+          : "${FTP_HOST:?FTP_HOST repository secret is missing or empty}"
+          : "${FTP_USERNAME:?FTP_USERNAME repository secret is missing or empty}"
+          : "${LFTP_PASSWORD:?FTP_PASSWORD repository secret is missing or empty}"
+
+          if ! getent ahosts "${FTP_HOST}" > /dev/null; then
+            echo "::error::FTP_HOST does not resolve in DNS"
+            exit 1
+          fi
+          echo "::notice::DNS lookup succeeded"
+
+          if ! timeout 10 bash -c 'exec 3<>/dev/tcp/$1/22' -- "${FTP_HOST}"; then
+            echo "::error::SFTP host is not reachable on TCP port 22"
+            exit 1
+          fi
+          echo "::notice::TCP port 22 is reachable"
+
+          lftp --norc -c "
               set cmd:fail-exit true;
+              set net:max-retries 1;
+              set net:timeout 15;
               set sftp:auto-confirm true;
               set xfer:use-temp-file true;
               set xfer:temp-file-name .incomplete-*;
+              open --user \"${FTP_USERNAME}\" --env-password -p 22 \"sftp://${FTP_HOST}\";
+              cls -1 > /dev/null;
               lcd site;
               mirror --reverse --parallel=4 --no-perms --exclude-glob index.html ./ ./;
               put index.html -o index.html;
               mirror --reverse --delete --only-missing --parallel=4 --no-perms ./ ./;
               bye;
-            " \
-            "sftp://${FTP_HOST}"
+            "
