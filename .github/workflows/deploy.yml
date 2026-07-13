@@ -1,0 +1,62 @@
+name: Deploy release
+
+on:
+  release:
+    types: [published]
+
+concurrency:
+  group: production-deployment
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out release
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.release.tag_name }}
+          path: release
+          persist-credentials: false
+
+      - name: Prepare site
+        run: |
+          mkdir site
+          rsync -a \
+            --exclude='.git/' \
+            --exclude='.agents/' \
+            --exclude='.github/' \
+            release/ site/
+
+      - name: Install FTP client
+        run: sudo apt-get update && sudo apt-get install --yes lftp
+
+      - name: Deploy
+        env:
+          FTP_HOST: ${{ secrets.FTP_HOST }}
+          FTP_PORT: ${{ secrets.FTP_PORT }}
+          FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+          LFTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+        run: |
+          FTP_PORT="${FTP_PORT:-21}"
+          lftp --norc \
+            --user "${FTP_USERNAME}" \
+            --env-password \
+            -p "${FTP_PORT}" \
+            -e "
+              set cmd:fail-exit true;
+              set ftp:ssl-force true;
+              set ssl:verify-certificate true;
+              set xfer:use-temp-file true;
+              set xfer:temp-file-name .incomplete-*;
+              lcd site;
+              mirror --reverse --parallel=4 --no-perms --exclude-glob index.html ./ ./;
+              put index.html -o index.html;
+              mirror --reverse --delete --only-missing --parallel=4 --no-perms ./ ./;
+              bye;
+            " \
+            "ftp://${FTP_HOST}"
